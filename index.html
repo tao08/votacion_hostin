@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votación de Candidatos</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<main>
+
+    <div class="container__card">
+
+        <div class="card__father">
+            <div class="card">
+                <div class="card__front" style="background-image: url(images/candidate1.jpg);">
+                    <div class="bg"></div>
+                    <div class="body__card_front">
+                        <h1>Candidato 1</h1>
+                    </div>
+                </div>
+                <div class="card__back">
+                    <div class="body__card_back">
+                        <h1>Candidato 1</h1>
+                        <p>Descripción del candidato 1.</p>
+                        <button onclick="votar(1)">Votar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card__father">
+            <div class="card">
+                <div class="card__front" style="background-image: url(images/candidate2.jpg);">
+                    <div class="bg"></div>
+                    <div class="body__card_front">
+                        <h1>Candidato 2</h1>
+                    </div>
+                </div>
+                <div class="card__back">
+                    <div class="body__card_back">
+                        <h1>Candidato 2</h1>
+                        <p>Descripción del candidato 2.</p>
+                        <button onclick="votar(2)">Votar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card__father">
+            <div class="card">
+                <div class="card__front" style="background-image: url(images/candidate3.jpg);">
+                    <div class="bg"></div>
+                    <div class="body__card_front">
+                        <h1>Candidato 3</h1>
+                    </div>
+                </div>
+                <div class="card__back">
+                    <div class="body__card_back">
+                        <h1>Candidato 3</h1>
+                        <p>Descripción del candidato 3.</p>
+                        <button onclick="votar(3)">Votar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Contenedor de Resultados en Tiempo Real -->
+    <div class="votacion-en-tiempo-real">
+        <h2>Resultados de Votación en Tiempo Real</h2>
+        <canvas id="grafica-resultados"></canvas>
+        <div class="resultados">
+            <!-- Aquí se mostrarán los resultados de votación en tiempo real -->
+        </div>
+    </div>
+
+    <!-- Contador de Cuenta Regresiva -->
+    <div class="contador-container">
+        <h2>Cuenta Regresiva</h2>
+        <div id="contador"></div>
+    </div>
+
+</main>
+
+<script>
+    // Obtener el contexto del canvas
+    const ctx = document.getElementById('grafica-resultados').getContext('2d');
+
+    // Inicializar la gráfica de barras con valores iniciales en 0
+    const graficaResultados = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Candidato 1', 'Candidato 2', 'Candidato 3'],
+            datasets: [{
+                label: 'Votos',
+                data: [0, 0, 0],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    display: false // Oculta los números en el eje Y
+                }
+            }
+        }
+    });
+
+    // Función para votar por un candidato
+    function votar(candidato) {
+        // Obtener los votos actuales del almacenamiento local o inicializarlos a 0
+        let votos = JSON.parse(localStorage.getItem('votos')) || [0, 0, 0];
+
+        // Incrementar el voto del candidato seleccionado
+        votos[candidato - 1]++;
+
+        // Actualizar el almacenamiento local con los nuevos votos
+        localStorage.setItem('votos', JSON.stringify(votos));
+
+        // Actualizar la gráfica de resultados con los nuevos votos
+        graficaResultados.data.datasets[0].data = votos;
+        graficaResultados.update();
+    }
+
+    // Verificar si hay votos en el almacenamiento local y actualizar la gráfica si es necesario
+    const votosGuardados = JSON.parse(localStorage.getItem('votos'));
+    if (votosGuardados) {
+        graficaResultados.data.datasets[0].data = votosGuardados;
+        graficaResultados.update();
+    }
+
+    // Calcular la cuenta regresiva hasta el 6 de julio de 2024
+    function calcularCuentaRegresiva() {
+        // Obtener la fecha actual
+        const fechaActual = new Date();
+
+        // Obtener la fecha límite (6 de julio de 2024)
+        const fechaLimite = new Date('July 6, 2024 00:00:00');
+
+        // Calcular la diferencia en milisegundos
+        const diferenciaTiempo = fechaLimite - fechaActual;
+
+        // Calcular los días, horas, minutos y segundos restantes
+        let segundosRestantes = Math.floor(diferenciaTiempo / 1000);
+        let minutosRestantes = Math.floor(segundosRestantes / 60);
+        let horasRestantes = Math.floor(minutosRestantes / 60);
+        let diasRestantes = Math.floor(horasRestantes / 24);
+
+        horasRestantes %= 24;
+        minutosRestantes %= 60;
+        segundosRestantes %= 60;
+
+        // Mostrar la cuenta regresiva en el formato deseado
+        const contador = document.getElementById('contador');
+        contador.textContent = `${diasRestantes} días, ${horasRestantes} horas, ${minutosRestantes} minutos, ${segundosRestantes} segundos`;
+    }
+
+    // Actualizar la cuenta regresiva cada segundo
+    calcularCuentaRegresiva();
+    setInterval(calcularCuentaRegresiva, 1000);
+</script>
+
+</body>
+</html>
